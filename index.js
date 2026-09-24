@@ -15,27 +15,27 @@ async function apiRequest(url,options= {}){
     }
 }
 
-async function getProducts(){
+async function getProducts(productId){
 
-            const url= id ? `${URL_API}/${id}` : `${URL_API}`;
+            const url= productId ? `${URL_API}/${productId}` : `${URL_API}`;
             await apiRequest(url);
 }
 
-async function deleteProduct() {
+async function deleteProduct(productId) {
         
-    if(!id){
+    if(!productId){
         console.log("No existe el id del producto que desea eliminar")
         return
     }
 
-            const url = id ? `${URL_API}/${id}` : `${URL_API}`;
+            const url = productId ? `${URL_API}/${productId}` : `${URL_API}`;
             await apiRequest(url, {
                 method: 'DELETE'
             });
 }
 
-async function postProduct() {
-      const nuevoProducto = { title: title, price: parseFloat(price), category:category}
+async function postProduct(newTitle,newPrice,newCategoy) {
+      const nuevoProducto = { title: newTitle, price: parseFloat(newPrice), category:newCategoy}
      await apiRequest(URL_API,{
         method: 'POST',
         headers:{ 'Content-Type' : 'application/json'},
@@ -44,14 +44,14 @@ async function postProduct() {
 }
 
 const ACTIONS= {
-    GET: getProducts,
-    POST: postProduct,
-    DELETE: deleteProduct
+    GET: () => getProducts(id),
+    POST: () => postProduct(title,price,category),
+    DELETE: () => deleteProduct(id)
 }
 
 function main(){
     if(resource != "products"){
-        console.log("Recurso no valido, utilice products")
+       return  console.log("Recurso no valido, utilice products")
     }
 
     const action= ACTIONS[method];
