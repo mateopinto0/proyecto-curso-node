@@ -1,22 +1,24 @@
 const URL_API=  'https://fakestoreapi.com/products';
 
-const method=process.argv[2].toUpperCase();
-const path=process.argv[3] || "";
-const title= process.argv[4];
-const price= process.argv[5];
-const category= process.argv[6];
+const [, , methodInput = '', path= '',title,price,category  ]= process.argv;
+const method=methodInput.toUpperCase();
 const[resource,id]=path.split("/");
 
+async function apiRequest(url,options= {}){
+    try{
+        const res= await fetch(url,options);
+        const data = await res.json();
+
+        console.dir(data,{depth: null , colors: true})
+    }catch(error){
+        console.log("Ocurrio el siguiente error " + error)
+    }
+}
+
 async function getProducts(){
-    
-        try{
+
             const url= id ? `${URL_API}/${id}` : `${URL_API}`;
-            const res= await fetch(url);
-            const data= await res.json();
-            console.log(data);
-        }catch(error){
-            console.log(error)
-        }
+            await apiRequest(url);
 }
 
 async function deleteProduct() {
@@ -26,48 +28,37 @@ async function deleteProduct() {
         return
     }
 
-    try{
             const url = id ? `${URL_API}/${id}` : `${URL_API}`;
-            const res=await fetch(url, {
+            await apiRequest(url, {
                 method: 'DELETE'
             });
-            const data= await res.json();
-            console.log(data)
-    }catch(error){
-        console.log(error)
-    }
 }
 
 async function postProduct() {
       const nuevoProducto = { title: title, price: parseFloat(price), category:category}
-
-    try{
-     const res= await fetch(URL_API,{
+     await apiRequest(URL_API,{
         method: 'POST',
         headers:{ 'Content-Type' : 'application/json'},
         body: JSON.stringify(nuevoProducto)
       });
-      const data= await res.json();
-      console.log(data)
-    }catch(error){
-        console.log(error)
+}
+
+const ACTIONS= {
+    GET: getProducts,
+    POST: postProduct,
+    DELETE: deleteProduct
+}
+
+function main(){
+    if(resource != "products"){
+        console.log("Recurso no valido, utilice products")
     }
+
+    const action= ACTIONS[method];
+    if(!action){
+        return console.log("Metodo no reconocido utilice GET,POSTO DELETE.")
+    }
+    action();
 }
-if(resource != "products"){
-    console.log("Recurso no valido, utilice products")
-}else{
-switch(method){
-    case 'GET':
-            getProducts();
-        break;
-    case 'DELETE':
-            deleteProduct();
-        break; 
-    case 'POST':
-            postProduct()
-        break;    
-    default:
-        console.log("Comando no reconocido")
-        break;    
-}
-}
+
+main();
